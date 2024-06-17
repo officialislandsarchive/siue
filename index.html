@@ -6,23 +6,32 @@
     <title>Video to Text Converter</title>
 </head>
 <body>
-    <input type="file" accept="video/*" id="videoInput" />
-    <video controls id="videoPlayer" style="max-width: 100%;"></video>
-    <button onclick="extractText()">Extract Text</button>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" accept="video/*" id="videoInput" name="video">
+        <button type="button" onclick="uploadVideo()">Upload Video</button>
+    </form>
 
     <script>
-        const videoInput = document.getElementById('videoInput');
-        const videoPlayer = document.getElementById('videoPlayer');
+        function uploadVideo() {
+            const form = document.getElementById('uploadForm');
+            const formData = new FormData(form);
 
-        videoInput.addEventListener('change', function(event) {
-            const file = this.files[0];
-            const url = URL.createObjectURL(file);
-            videoPlayer.src = url;
-        });
-
-        function extractText() {
-            // Implement text extraction logic here
-            alert('Text extraction functionality needs backend implementation.');
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'extracted_text.txt';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
 </body>
